@@ -9,7 +9,7 @@
             stylesheets="@../styles/styles.css">
     <children>
         <VBox alignment="TOP_CENTER" spacing="20" AnchorPane.topAnchor="20.0" AnchorPane.leftAnchor="20.0"
-              AnchorPane.rightAnchor="20.0">
+              AnchorPane.rightAnchor="20.0" AnchorPane.bottomAnchor="20.0">
             <Label text="Bienvenido a tu Biblioteca" styleClass="label-title" />
             
             <HBox spacing="10" alignment="CENTER">
@@ -17,8 +17,14 @@
                 <Button text="Buscar" onAction="#handleSearch" styleClass="button button-primary"/>
             </HBox>
             
-            <ScrollPane fitToWidth="true" prefHeight="450">
-                <VBox fx:id="resultsContainer" spacing="10" padding="10"/>
+            <ScrollPane fitToWidth="true" fitToHeight="true" prefHeight="450">
+                <content>
+                    <VBox fx:id="resultsContainer" spacing="10">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+                    </VBox>
+                </content>
             </ScrollPane>
         </VBox>
     </children>
