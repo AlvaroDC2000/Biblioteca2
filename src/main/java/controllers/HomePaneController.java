@@ -49,7 +49,7 @@ public class HomePaneController {
                 String title = volumeInfo.optString("title", "Sin título");
                 String authors = volumeInfo.has("authors") ? volumeInfo.getJSONArray("authors").join(", ").replaceAll("\"", "") : "Autor desconocido";
 
-                Label resultado = new Label("º" + title + " — " + authors);
+                Label resultado = new Label("º " + title + " — " + authors);
                 resultado.getStyleClass().add("search-result");
                 resultsContainer.getChildren().add(resultado);
             }
