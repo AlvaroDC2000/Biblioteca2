@@ -12,9 +12,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="500" prefWidth="800" stylesheets="@../styles/styles.css"
-            xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.LoginDataPaneController">
+<AnchorPane prefHeight="500" prefWidth="800" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginDataPaneController">
     <children>
         <VBox alignment="CENTER" layoutX="0" layoutY="20" prefWidth="800" spacing="10">
             <ImageView fx:id="logoID" fitHeight="100.0" fitWidth="156.0" pickOnBounds="true" preserveRatio="true" />
@@ -47,4 +45,3 @@
         </VBox>
     </children>
 </AnchorPane>
-
