@@ -1,12 +1,14 @@
 package controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -44,7 +46,6 @@ public class HomePaneController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        System.out.println("[INIT] HomePaneController cargado");
 
         // Cargar logo
         String imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png";
@@ -56,10 +57,8 @@ public class HomePaneController implements Initializable {
             try (InputStream inputStream = connection.getInputStream()) {
                 Image image = new Image(inputStream);
                 drawerLogo.setImage(image);
-                System.out.println("[OK] Logo cargado correctamente.");
             }
         } catch (Exception e) {
-            System.out.println("[ERROR] No se pudo cargar el logo:");
             e.printStackTrace();
         }
     }
@@ -108,13 +107,13 @@ public class HomePaneController implements Initializable {
                             resultsContainer.getChildren().add(resultLabel);
                         }
                     } else {
-                        resultsContainer.getChildren().add(new Label("No se encontraron resultados."));
+                        resultsContainer.getChildren().add(new Label(" No se encontraron resultados."));
                     }
                 });
 
             } catch (Exception e) {
                 Platform.runLater(() -> {
-                    resultsContainer.getChildren().add(new Label("Error al conectar con Google Books."));
+                    resultsContainer.getChildren().add(new Label(" Error al conectar con Google Books."));
                 });
                 e.printStackTrace();
             }
@@ -123,6 +122,16 @@ public class HomePaneController implements Initializable {
 
     @FXML
     private void handleShowBuscar() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/HomePane.fxml"));
+            AnchorPane homePane = loader.load();
+
+            javafx.stage.Stage stage = (javafx.stage.Stage) searchField.getScene().getWindow();
+            stage.getScene().setRoot(homePane);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -139,5 +148,19 @@ public class HomePaneController implements Initializable {
 
     @FXML
     private void handleLogout() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/LoginDataPane.fxml"));
+            AnchorPane loginPane = loader.load();
+
+            javafx.stage.Stage stage = (javafx.stage.Stage) drawerLogo.getScene().getWindow();
+
+            javafx.scene.Scene scene = new javafx.scene.Scene(loginPane);
+            stage.setScene(scene);
+            stage.setTitle("Biblioteca");
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

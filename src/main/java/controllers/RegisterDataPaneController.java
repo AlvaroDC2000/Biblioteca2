@@ -51,10 +51,20 @@ public class RegisterDataPaneController {
         String repeatPassword = repeatPasswordField.getText();
         String genre = favoriteGenreComboBox.getValue();
 
+        if (!email.matches("^[\\w-.]+@[\\w-]+\\.[a-zA-Z]{2,}$")) {
+          errorLabel.setText(" Introduce un email válido.");
+          return;
+      }
+        
         if (!password.equals(repeatPassword)) {
-            errorLabel.setText("⚠ Las contraseñas no coinciden.");
+            errorLabel.setText(" Las contraseñas no coinciden.");
             return;
         }
+        
+        if (password.length() < 6) {
+          errorLabel.setText(" La contraseña debe tener al menos 6 caracteres.");
+          return;
+      }
 
         if (!email.isEmpty() && !password.isEmpty() && genre != null) {
             try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -63,7 +73,7 @@ public class RegisterDataPaneController {
                 Usuario existingUser = query.uniqueResult();
 
                 if (existingUser != null) {
-                    errorLabel.setText("⚠ Ya existe un usuario con ese email.");
+                    errorLabel.setText(" Ya existe un usuario con ese email.");
                     return;
                 }
 
@@ -81,11 +91,11 @@ public class RegisterDataPaneController {
                 mainController.loadLoginDataPane();
 
             } catch (Exception e) {
-                errorLabel.setText("⚠ Error al registrar el usuario.");
+                errorLabel.setText(" Error al registrar el usuario.");
                 e.printStackTrace();
             }
         } else {
-            errorLabel.setText("⚠ Rellena todos los campos.");
+            errorLabel.setText(" Rellena todos los campos.");
         }
     }
 

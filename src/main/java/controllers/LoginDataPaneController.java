@@ -42,22 +42,16 @@ public class LoginDataPaneController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        System.out.println("[INIT] Inicializando LoginDataPaneController...");
-        System.out.println("[DEBUG] ImageView (logoID) es null: " + (logoID == null));
 
         String imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png";
-        System.out.println("[DEBUG] URL de la imagen: " + imageUrl);
 
         try {
             Image image = new Image(imageUrl);
             if (image.isError()) {
-                System.out.println("[ERROR] Fallo al cargar la imagen: " + image.getException());
             } else {
                 logoID.setImage(image);
-                System.out.println("[OK] Imagen cargada correctamente.");
             }
         } catch (Exception e) {
-            System.out.println("[EXCEPTION] Excepción al cargar imagen:");
             e.printStackTrace();
         }
     }

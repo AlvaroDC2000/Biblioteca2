@@ -10,8 +10,9 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="693.0" prefWidth="957.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.HomePaneController">
+<AnchorPane prefHeight="693.0" prefWidth="957.0" stylesheets="@../styles/styles.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.HomePaneController">
 
     <children>
         <BorderPane fx:id="mainBorder" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
@@ -27,7 +28,10 @@
                         <Insets bottom="80.0" top="20.0" />
                      </VBox.margin></ImageView>
                     </VBox>
-                    <Button maxWidth="195.0" onAction="#handleShowBuscar" prefHeight="39.0" prefWidth="195.0" text="Buscar" />
+                    <Button maxWidth="195.0" onAction="#handleShowBuscar" prefHeight="39.0" prefWidth="195.0" text="Buscar">
+                  <font>
+                     <Font name="Bodoni MT" size="12.0" />
+                  </font></Button>
                     <Button maxWidth="195.0" onAction="#handleShowRecomendaciones" prefHeight="39.0" prefWidth="195.0" text="Recomendaciones" />
                     <Button maxWidth="195.0" onAction="#handleShowBiblioteca" prefHeight="39.0" prefWidth="195.0" text="Mi Biblioteca" />
                     <Button maxWidth="195.0" onAction="#handleShowPerfil" prefHeight="39.0" prefWidth="195.0" text="Perfil" />
@@ -48,7 +52,7 @@
                         <Button onAction="#handleSearch" styleClass="button button-primary" text="Buscar" />
                     </HBox>
 
-                    <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="450">
+                    <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="542.0" prefWidth="706.0">
                         <content>
                             <VBox fx:id="resultsContainer" prefHeight="524.0" prefWidth="703.0" spacing="10">
                                 <padding>
