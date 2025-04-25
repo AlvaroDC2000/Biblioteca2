@@ -24,8 +24,10 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class RegisterDataPaneController {
@@ -120,46 +122,57 @@ public class RegisterDataPaneController {
         }
     }
 
-
     @FXML
     public void initialize() {
-        new Thread(() -> {
-            Set<String> generos = new HashSet<>();
-            try {
-                String urlStr = "https://www.googleapis.com/books/v1/volumes?q=bestseller&maxResults=40";
-                URL url = new URL(urlStr);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
+        Set<String> generos = new HashSet<>();
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                StringBuilder result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
-                reader.close();
+        // Diccionario de traducción inglés a español
+        Map<String, String> traducciones = Map.ofEntries(
+            Map.entry("Fiction", "Ficción"),
+            Map.entry("Literary Criticism", "Crítica literaria"),
+            Map.entry("History", "Historia"),
+            Map.entry("Computers", "Informática"),
+            Map.entry("Reference", "Referencia"),
+            Map.entry("Biography & Autobiography", "Biografía y autobiografía"),
+            Map.entry("Social Science", "Ciencias sociales"),
+            Map.entry("Business & Economics", "Negocios y economía"),
+            Map.entry("Language Arts & Disciplines", "Lengua y literatura")
+        );
 
-                JSONObject json = new JSONObject(result.toString());
-                JSONArray items = json.getJSONArray("items");
+        try {
+            String urlStr = "https://www.googleapis.com/books/v1/volumes?q=bestseller&maxResults=30&langRestrict=es";
+            URL url = URI.create(urlStr).toURL();
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
 
-                for (int i = 0; i < items.length(); i++) {
-                    JSONObject volumeInfo = items.getJSONObject(i).getJSONObject("volumeInfo");
-                    if (volumeInfo.has("categories")) {
-                        JSONArray categories = volumeInfo.getJSONArray("categories");
-                        for (int j = 0; j < categories.length(); j++) {
-                            generos.add(categories.getString(j));
-                        }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder result = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            reader.close();
+
+            JSONObject json = new JSONObject(result.toString());
+            JSONArray items = json.getJSONArray("items");
+
+            for (int i = 0; i < items.length(); i++) {
+                JSONObject volumeInfo = items.getJSONObject(i).getJSONObject("volumeInfo");
+                if (volumeInfo.has("categories")) {
+                    JSONArray categories = volumeInfo.getJSONArray("categories");
+                    for (int j = 0; j < categories.length(); j++) {
+                        String original = categories.getString(j);
+                        String traducido = traducciones.getOrDefault(original, original); 
+                        generos.add(traducido);
                     }
                 }
-
-                Platform.runLater(() -> favoriteGenreComboBox.getItems().addAll(generos));
-            } catch (Exception e) {
-                e.printStackTrace();
-                Platform.runLater(() -> {
-                    errorLabel.setText("Error al cargar géneros desde Google Books.");
-                });
             }
-        }).start();
+
+            favoriteGenreComboBox.getItems().addAll(generos);
+        } catch (Exception e) {
+            e.printStackTrace();
+            errorLabel.setText("Error al cargar géneros desde Google Books.");
+        }
     }
 
 }
