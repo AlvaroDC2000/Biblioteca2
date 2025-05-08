@@ -94,19 +94,46 @@ public class HomePaneController implements Initializable {
                     for (int i = 0; i < items.length(); i++) {
                         JSONObject volumeInfo = items.getJSONObject(i).getJSONObject("volumeInfo");
                         String title = volumeInfo.optString("title", "Sin título");
-                        String authors = "Autor desconocido";
 
+                        String tempAuthors = "Autor desconocido";
                         if (volumeInfo.has("authors")) {
                             JSONArray authorsArray = volumeInfo.getJSONArray("authors");
                             List<String> authorList = new ArrayList<>();
                             for (int j = 0; j < authorsArray.length(); j++) {
                                 authorList.add(authorsArray.getString(j));
                             }
-                            authors = String.join(", ", authorList);
+                            tempAuthors = String.join(", ", authorList);
                         }
+                        final String authors = tempAuthors;
 
                         Label resultLabel = new Label("º " + title + " — " + authors);
-                        resultLabel.setStyle("-fx-padding: 5;");
+                        resultLabel.setStyle("-fx-padding: 5; -fx-cursor: hand;");
+                        resultLabel.setOnMouseClicked(event -> {
+                            try {
+                                // Crear libro
+                                models.Libro libro = new models.Libro();
+                                libro.setTitulo(title);
+                                libro.setAutor(authors);
+                                libro.setDescripcion(volumeInfo.optString("description", "Sin descripción."));
+                                if (volumeInfo.has("imageLinks")) {
+                                    libro.setImagenUrl(volumeInfo.getJSONObject("imageLinks").optString("thumbnail", ""));
+                                } else {
+                                    libro.setImagenUrl(""); // por si no hay imagen
+                                }
+
+                                // Cargar detalles
+                                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Details.fxml"));
+                                AnchorPane detailsPane = loader.load();
+
+                                controllers.DetailsController controller = loader.getController();
+                                controller.setLibro(libro);
+
+                                javafx.stage.Stage stage = (javafx.stage.Stage) searchField.getScene().getWindow();
+                                stage.getScene().setRoot(detailsPane);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
                         resultsContainer.getChildren().add(resultLabel);
                     }
                 } else {
@@ -135,13 +162,40 @@ public class HomePaneController implements Initializable {
     }
 
     @FXML
-    private void handleShowRecomendaciones() {}
+    private void handleShowRecomendaciones() {
+      try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Recomendations.fxml"));
+        AnchorPane homePane = loader.load();
+        javafx.stage.Stage stage = (javafx.stage.Stage) searchField.getScene().getWindow();
+        stage.getScene().setRoot(homePane);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+  }
 
     @FXML
-    private void handleShowBiblioteca() {}
+    private void handleShowBiblioteca() {
+      try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UserLibrary.fxml"));
+        AnchorPane homePane = loader.load();
+        javafx.stage.Stage stage = (javafx.stage.Stage) searchField.getScene().getWindow();
+        stage.getScene().setRoot(homePane);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+  }
 
     @FXML
-    private void handleShowPerfil() {}
+    private void handleShowPerfil() {
+      try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Profile.fxml"));
+        AnchorPane homePane = loader.load();
+        javafx.stage.Stage stage = (javafx.stage.Stage) searchField.getScene().getWindow();
+        stage.getScene().setRoot(homePane);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+   }
 
     @FXML
     private void handleLogout() {
