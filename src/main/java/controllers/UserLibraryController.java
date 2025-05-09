@@ -3,13 +3,17 @@ package controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import models.Libro;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
+
 import java.net.URL;
 import java.net.URI;
 import java.net.URLConnection;
@@ -29,12 +33,16 @@ public class UserLibraryController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Cargar logo
-        String imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png";
+        cargarLogo();
+        mostrarLibrosGuardados("");
+    }
+
+    private void cargarLogo() {
         try {
-            URL url = URI.create(imageUrl).toURL();
+            URL url = new URI("https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png").toURL();
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+
             try (InputStream inputStream = connection.getInputStream()) {
                 Image image = new Image(inputStream);
                 drawerLogo.setImage(image);
@@ -47,77 +55,99 @@ public class UserLibraryController implements Initializable {
     @FXML
     private void handleSearch() {
         String query = searchField.getText().trim().toLowerCase();
+        mostrarLibrosGuardados(query);
+    }
+
+    private void mostrarLibrosGuardados(String filtro) {
         libraryContainer.getChildren().clear();
 
-        // Simulación de resultados
-        for (int i = 1; i <= 3; i++) {
-            VBox card = new VBox(5);
-            card.setStyle("-fx-background-color: #2a4d7a; -fx-padding: 10; -fx-background-radius: 10;");
-            card.setPrefWidth(650);
+        for (Libro libro : dao.LibroDAO.obtenerTodos()) {
+            boolean coincide = filtro.isEmpty() ||
+                    libro.getTitulo().toLowerCase().contains(filtro) ||
+                    libro.getAutor().toLowerCase().contains(filtro) ||
+                    (libro.getEditorial() != null && libro.getEditorial().toLowerCase().contains(filtro));
 
-            Label title = new Label("📘 Libro " + i + ": El título del libro");
-            title.setStyle("-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;");
+            if (!coincide) continue;
 
-            Label author = new Label("Autor: Autor Ejemplo");
-            author.setStyle("-fx-text-fill: white;");
+            VBox card = new VBox(10);
+            card.getStyleClass().add("card-libro");
+            card.setPrefWidth(660);
 
-            Button removeButton = new Button("Quitar de mi biblioteca");
-            removeButton.setStyle("-fx-background-color: #c62828; -fx-text-fill: white;");
-            removeButton.setOnAction(e -> libraryContainer.getChildren().remove(card));
+            Label title = new Label("Título: " + libro.getTitulo());
+            title.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
 
-            card.getChildren().addAll(title, author, removeButton);
+            Label author = new Label("Autor: " + libro.getAutor());
+            author.setStyle("-fx-text-fill: #e0e0e0;");
+
+            Label editorial = new Label("Editorial: " + (libro.getEditorial() != null ? libro.getEditorial() : "Desconocida"));
+            editorial.setStyle("-fx-text-fill: #b0bec5;");
+
+            ImageView portada = new ImageView();
+            portada.setFitWidth(100);
+            portada.setPreserveRatio(true);
+            if (libro.getImagenUrl() != null && !libro.getImagenUrl().isEmpty()) {
+                try {
+                    URL url = new URI(libro.getImagenUrl()).toURL();
+                    URLConnection conn = url.openConnection();
+                    conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+                    try (InputStream input = conn.getInputStream()) {
+                        portada.setImage(new Image(input));
+                    }
+                } catch (Exception e) {
+                    System.out.println("No se pudo cargar la imagen del libro: " + libro.getTitulo());
+                }
+            }
+
+            HBox actions = new HBox(10);
+            actions.setAlignment(Pos.CENTER_LEFT);
+
+            Button likeButton = new Button("❤ Me gusta");
+            likeButton.getStyleClass().add("button-like");
+            likeButton.setOnAction(e -> {
+                System.out.println(" Libro marcado como favorito: " + libro.getTitulo());
+            });
+
+            Button removeButton = new Button("Eliminar");
+            removeButton.getStyleClass().add("button-remove");
+            removeButton.setOnAction(e -> {
+                dao.LibroDAO.eliminarLibro(libro);
+                libraryContainer.getChildren().remove(card);
+            });
+
+            actions.getChildren().addAll(likeButton, removeButton);
+
+            VBox detailsBox = new VBox(5, title, author, editorial, actions);
+            HBox content = new HBox(15, portada, detailsBox);
+            card.getChildren().add(content);
             libraryContainer.getChildren().add(card);
+        }
+
+        if (libraryContainer.getChildren().isEmpty()) {
+            Label noResults = new Label("No se encontraron resultados.");
+            noResults.setStyle("-fx-text-fill: white;");
+            libraryContainer.getChildren().add(noResults);
         }
     }
 
-
     @FXML
     private void handleShowBuscar() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/HomePane.fxml"));
-            AnchorPane homePane = loader.load();
-            javafx.stage.Stage stage = (javafx.stage.Stage) searchField.getScene().getWindow();
-            stage.getScene().setRoot(homePane);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        cambiarPantalla("/views/HomePane.fxml");
     }
 
     @FXML
     private void handleShowRecomendaciones() {
-      try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Recomendations.fxml"));
-        AnchorPane homePane = loader.load();
-        javafx.stage.Stage stage = (javafx.stage.Stage) searchField.getScene().getWindow();
-        stage.getScene().setRoot(homePane);
-    } catch (Exception e) {
-        e.printStackTrace();
+        cambiarPantalla("/views/Recomendations.fxml");
     }
-  }
 
     @FXML
     private void handleShowBiblioteca() {
-      try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UserLibrary.fxml"));
-        AnchorPane homePane = loader.load();
-        javafx.stage.Stage stage = (javafx.stage.Stage) searchField.getScene().getWindow();
-        stage.getScene().setRoot(homePane);
-    } catch (Exception e) {
-        e.printStackTrace();
+        cambiarPantalla("/views/UserLibrary.fxml");
     }
-  }
 
     @FXML
     private void handleShowPerfil() {
-      try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Profile.fxml"));
-        AnchorPane homePane = loader.load();
-        javafx.stage.Stage stage = (javafx.stage.Stage) searchField.getScene().getWindow();
-        stage.getScene().setRoot(homePane);
-    } catch (Exception e) {
-        e.printStackTrace();
+        cambiarPantalla("/views/Profile.fxml");
     }
-   }
 
     @FXML
     private void handleLogout() {
@@ -133,4 +163,16 @@ public class UserLibraryController implements Initializable {
             e.printStackTrace();
         }
     }
+
+    private void cambiarPantalla(String ruta) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(ruta));
+            AnchorPane root = loader.load();
+            javafx.stage.Stage stage = (javafx.stage.Stage) drawerLogo.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
+

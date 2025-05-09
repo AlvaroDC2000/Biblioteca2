@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 
 <AnchorPane prefHeight="693.0" prefWidth="957.0" stylesheets="@../styles/styles.css"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
@@ -29,25 +25,25 @@
                             </VBox.margin>
                         </ImageView>
                     </VBox>
-                    <Button maxWidth="195.0" onAction="#handleShowBuscar" prefHeight="39.0" prefWidth="195.0" text="Buscar"/>
-                    <Button maxWidth="195.0" onAction="#handleShowRecomendaciones" prefHeight="39.0" prefWidth="195.0" text="Recomendaciones"/>
-                    <Button maxWidth="195.0" onAction="#handleShowBiblioteca" prefHeight="39.0" prefWidth="195.0" text="Mi Biblioteca"/>
-                    <Button maxWidth="195.0" onAction="#handleShowPerfil" prefHeight="39.0" prefWidth="195.0" text="Perfil"/>
-                    <Button maxWidth="195.0" onAction="#handleLogout" prefHeight="39.0" prefWidth="195.0" text="Cerrar sesión"/>
+                    <Button onAction="#handleShowBuscar" prefWidth="195.0" text="Buscar"/>
+                    <Button onAction="#handleShowRecomendaciones" prefWidth="195.0" text="Recomendaciones"/>
+                    <Button onAction="#handleShowBiblioteca" prefWidth="195.0" text="Mi Biblioteca"/>
+                    <Button onAction="#handleShowPerfil" prefWidth="195.0" text="Perfil"/>
+                    <Button onAction="#handleLogout" prefWidth="195.0" text="Cerrar sesión"/>
                 </VBox>
             </left>
 
             <center>
                 <VBox alignment="TOP_CENTER" spacing="20">
                     <padding>
-                        <Insets bottom="20" left="20" right="20" top="20"/>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
                     </padding>
 
                     <Label styleClass="label-title" text="Detalles del libro"/>
 
-                    <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="542.0" prefWidth="706.0">
+                    <ScrollPane fitToWidth="true" fitToHeight="true" prefHeight="542.0">
                         <content>
-                            <VBox fx:id="detailsContainer" spacing="20" alignment="TOP_CENTER"
+                            <VBox fx:id="detailsContainer" spacing="15" alignment="TOP_CENTER"
                                   style="-fx-background-color: #1e3a5f;" prefWidth="700">
                                 <padding>
                                     <Insets top="20" bottom="20" left="20" right="20"/>
@@ -56,7 +52,42 @@
                                 <ImageView fx:id="bookImage" fitWidth="150" preserveRatio="true"/>
                                 <Label fx:id="titleLabel" styleClass="label-title"/>
                                 <Label fx:id="authorLabel" style="-fx-text-fill: white;"/>
+                                <Label fx:id="editorialLabel" style="-fx-text-fill: white;"/>
                                 <Label fx:id="descriptionLabel" wrapText="true" style="-fx-text-fill: white;" maxWidth="600"/>
+
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Label text="Estado:" style="-fx-text-fill: white;"/>
+                                    <ComboBox fx:id="estadoCombo" promptText="Seleccionar estado"/>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Label text="Fecha de lectura:" style="-fx-text-fill: white;"/>
+                                    <DatePicker fx:id="fechaLecturaPicker"/>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Label text="Nota (0-10):" style="-fx-text-fill: white;"/>
+                                    <Spinner fx:id="notaSpinner" prefWidth="80"/>
+                                </HBox>
+
+                                <Label text="Comentario personal:" style="-fx-text-fill: white;"/>
+                                <TextArea fx:id="comentarioArea" promptText="Escribe tu opinión..." wrapText="true"
+                                          prefWidth="600" prefHeight="100"/>
+
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Label text="Prestado a:" style="-fx-text-fill: white;"/>
+                                    <TextField fx:id="prestadoAField" promptText="Nombre de la persona"/>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Label text="Fecha préstamo:" style="-fx-text-fill: white;"/>
+                                    <DatePicker fx:id="fechaPrestamoPicker"/>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER">
+                                    <Label text="¿Devuelto?" style="-fx-text-fill: white;"/>
+                                    <CheckBox fx:id="devueltoCheck"/>
+                                </HBox>
 
                                 <Button text="Guardar en Mi Biblioteca" onAction="#handleSaveToLibrary"
                                         styleClass="button button-primary"/>

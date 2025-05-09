@@ -135,6 +135,7 @@ public class RegisterDataPaneController {
             Map.entry("Reference", "Referencia"),
             Map.entry("Biography & Autobiography", "Biografía y autobiografía"),
             Map.entry("Social Science", "Ciencias sociales"),
+            Map.entry("Poetry", "Poesía"),
             Map.entry("Business & Economics", "Negocios y economía"),
             Map.entry("Language Arts & Disciplines", "Lengua y literatura")
         );

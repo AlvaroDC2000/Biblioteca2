@@ -48,16 +48,15 @@
                     </HBox>
 
                     <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="542.0" prefWidth="706.0" style="-fx-background: #1e3a5f;">
-    				<content>
-        				<VBox fx:id="libraryContainer" alignment="TOP_CENTER" prefWidth="703.0" spacing="15" style="-fx-background-color: #1e3a5f;">
-            		<padding>
-                	<Insets bottom="20" left="20" right="20" top="20" />
-           	 </padding>
-
-           	 	<Label style="-fx-text-fill: white; -fx-font-size: 16px;" text="Aquí aparecerán los libros que te han gustado" />
-        				</VBox>
-    				</content>
-				</ScrollPane>
+                        <content>
+                            <VBox fx:id="libraryContainer" spacing="15" alignment="TOP_CENTER"
+                                  style="-fx-background-color: #1e3a5f;" prefWidth="703.0">
+                                <padding>
+                                    <Insets bottom="10" left="10" right="10" top="10" />
+                                </padding>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
                 </VBox>
             </center>
         </BorderPane>

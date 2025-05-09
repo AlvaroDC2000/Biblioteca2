@@ -1,34 +1,51 @@
 package dao;
 
 import models.Libro;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import utils.HibernateUtil;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import java.util.List;
 
 public class LibroDAO {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/biblioteca";
-    private static final String USER = "root";
-    private static final String PASSWORD = "root";
-
     public static void guardarLibro(Libro libro) {
-        String sql = "INSERT INTO libros (titulo, autor, descripcion, imagen_url) VALUES (?, ?, ?, ?)";
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
 
-        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            if (libro.getId() == 0) {
+                session.persist(libro); // Nuevo libro
+            } else {
+                session.merge(libro);   // Actualización
+            }
 
-            stmt.setString(1, libro.getTitulo());
-            stmt.setString(2, libro.getAutor());
-            stmt.setString(3, libro.getDescripcion());
-            stmt.setString(4, libro.getImagenUrl());
-
-            stmt.executeUpdate();
+            tx.commit();
             System.out.println(" Libro guardado correctamente en la base de datos.");
-
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
             System.err.println(" Error al guardar el libro:");
             e.printStackTrace();
         }
     }
+
+    public static List<Libro> obtenerTodos() {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("FROM Libro", Libro.class).list();
+        }
+    }
+
+    public static void eliminarLibro(Libro libro) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            session.remove(session.merge(libro));
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            System.err.println(" Error al eliminar el libro:");
+            e.printStackTrace();
+        }
+    }
 }
+
