@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 
 public class ApiUtils {
@@ -13,10 +14,11 @@ public class ApiUtils {
     public static String buscarLibros(String query) {
         StringBuilder response = new StringBuilder();
         try {
-            String urlStr = GOOGLE_BOOKS_API + query.replace(" ", "+");
-            URL url = new URL(urlStr);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
+          String urlStr = GOOGLE_BOOKS_API + query.replace(" ", "+");
+          URI uri = new URI(urlStr);
+          HttpURLConnection conn = (HttpURLConnection) uri.toURL().openConnection();
+          conn.setRequestMethod("GET");
+
 
             InputStream stream = conn.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));

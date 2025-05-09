@@ -2,6 +2,7 @@ package models;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "libros")
@@ -13,7 +14,13 @@ public class Libro {
 
     private String titulo;
     private String autor;
+    
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 
     @Column(name = "imagen_url")
     private String imagenUrl;
@@ -53,44 +60,109 @@ public class Libro {
     }
 
     // Getters y setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+      return id;
+  }
 
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
+  public void setId(int id) {
+      this.id = id;
+  }
 
-    public String getAutor() { return autor; }
-    public void setAutor(String autor) { this.autor = autor; }
+  public String getTitulo() {
+      return titulo;
+  }
 
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+  public void setTitulo(String titulo) {
+      this.titulo = titulo;
+  }
 
-    public String getImagenUrl() { return imagenUrl; }
-    public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
+  public String getAutor() {
+      return autor;
+  }
 
-    public String getEditorial() { return editorial; }
-    public void setEditorial(String editorial) { this.editorial = editorial; }
+  public void setAutor(String autor) {
+      this.autor = autor;
+  }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+  public String getDescripcion() {
+      return descripcion;
+  }
 
-    public LocalDate getFechaLectura() { return fechaLectura; }
-    public void setFechaLectura(LocalDate fechaLectura) { this.fechaLectura = fechaLectura; }
+  public void setDescripcion(String descripcion) {
+      this.descripcion = descripcion;
+  }
 
-    public Integer getNota() { return nota; }
-    public void setNota(Integer nota) { this.nota = nota; }
+  public String getImagenUrl() {
+      return imagenUrl;
+  }
 
-    public String getComentario() { return comentario; }
-    public void setComentario(String comentario) { this.comentario = comentario; }
+  public void setImagenUrl(String imagenUrl) {
+      this.imagenUrl = imagenUrl;
+  }
 
-    public String getPrestadoA() { return prestadoA; }
-    public void setPrestadoA(String prestadoA) { this.prestadoA = prestadoA; }
+  public String getEditorial() {
+      return editorial;
+  }
 
-    public LocalDate getFechaPrestamo() { return fechaPrestamo; }
-    public void setFechaPrestamo(LocalDate fechaPrestamo) { this.fechaPrestamo = fechaPrestamo; }
+  public void setEditorial(String editorial) {
+      this.editorial = editorial;
+  }
 
-    public Boolean getDevuelto() { return devuelto; }
-    public void setDevuelto(Boolean devuelto) { this.devuelto = devuelto; }
+  public String getEstado() {
+      return estado;
+  }
+
+  public void setEstado(String estado) {
+      this.estado = estado;
+  }
+
+  public LocalDate getFechaLectura() {
+      return fechaLectura;
+  }
+
+  public void setFechaLectura(LocalDate fechaLectura) {
+      this.fechaLectura = fechaLectura;
+  }
+
+  public Integer getNota() {
+      return nota;
+  }
+
+  public void setNota(Integer nota) {
+      this.nota = nota;
+  }
+
+  public String getComentario() {
+      return comentario;
+  }
+
+  public void setComentario(String comentario) {
+      this.comentario = comentario;
+  }
+
+  public String getPrestadoA() {
+      return prestadoA;
+  }
+
+  public void setPrestadoA(String prestadoA) {
+      this.prestadoA = prestadoA;
+  }
+
+  public LocalDate getFechaPrestamo() {
+      return fechaPrestamo;
+  }
+
+  public void setFechaPrestamo(LocalDate fechaPrestamo) {
+      this.fechaPrestamo = fechaPrestamo;
+  }
+
+  public Boolean getDevuelto() {
+      return devuelto;
+  }
+
+  public void setDevuelto(Boolean devuelto) {
+      this.devuelto = devuelto;
+  }
 
     @Override
     public String toString() {
@@ -109,4 +181,25 @@ public class Libro {
                 ", devuelto=" + devuelto +
                 '}';
     }
+    
+    @OneToMany(mappedBy = "libro", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Opinion> opiniones;
+
+    public List<Opinion> getOpiniones() { 
+      return opiniones;
+      }
+    
+    public void setOpiniones(List<Opinion> opiniones) { 
+      this.opiniones = opiniones;
+      }
+    
+    public Usuario getUsuario() {
+      return usuario;
+  }
+
+    public void setUsuario(Usuario usuario) {
+      this.usuario = usuario;
+  }
+
+
 }

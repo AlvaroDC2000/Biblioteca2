@@ -3,6 +3,7 @@
     -fx-background-color: linear-gradient(to bottom right, #152c5b, #223b70);
 }
 
+/* Títulos y etiquetas */
 .label-title {
     -fx-font-size: 32px;
     -fx-font-weight: bold;
@@ -14,13 +15,13 @@
     -fx-text-fill: #d0d0d0;
 }
 
+/* Botones */
 .button {
     -fx-background-radius: 12px;
     -fx-padding: 10 24;
     -fx-font-size: 16px;
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 5, 0, 0, 2);
-    -fx-transition: all 0.3s ease;
 }
 
 .button:hover {
@@ -38,6 +39,7 @@
     -fx-text-fill: white;
 }
 
+/* Campos de entrada */
 .text-field, .password-field, .combo-box {
     -fx-background-radius: 10px;
     -fx-border-radius: 10px;
@@ -52,6 +54,7 @@
     -fx-border-color: #2196F3;
 }
 
+/* Layouts */
 .grid-pane {
     -fx-hgap: 20;
     -fx-vgap: 25;
@@ -61,7 +64,7 @@
     -fx-spacing: 25;
 }
 
-/* Tarjetas de libros en la biblioteca del usuario */
+/* Tarjetas de libros */
 .card-libro {
     -fx-background-color: #2c3e50;
     -fx-padding: 15;
@@ -73,7 +76,7 @@
     -fx-border-width: 1;
 }
 
-/* Botón de "Me gusta" */
+/* Botones específicos */
 .button-like {
     -fx-background-color: #43a047;
     -fx-text-fill: white;
@@ -82,7 +85,6 @@
     -fx-background-radius: 8;
 }
 
-/* Botón de "Eliminar" */
 .button-remove {
     -fx-background-color: #e53935;
     -fx-text-fill: white;
@@ -91,10 +93,12 @@
     -fx-background-radius: 8;
 }
 
+/* ScrollPane */
 .scroll-pane {
     -fx-background-color: transparent;
     -fx-background: transparent;
 }
+
 .scroll-pane .viewport {
     -fx-background-color: #1e3a5f;
 }
@@ -102,18 +106,55 @@
 .scroll-bar:vertical {
     -fx-background-color: transparent;
 }
+
 .scroll-bar .thumb {
     -fx-background-color: #4a90e2;
     -fx-background-insets: 2;
     -fx-background-radius: 5;
 }
 
+/* Clases para etiquetas de libros */
 .label-title {
     -fx-text-fill: white;
     -fx-font-size: 18px;
     -fx-font-weight: bold;
 }
+
 .label-author {
     -fx-text-fill: #dcdcdc;
 }
 
+.libro-title {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.libro-title:hover {
+    -fx-text-fill: #90caf9;
+}
+
+.libro-author {
+    -fx-text-fill: #e0e0e0;
+}
+
+.libro-editorial {
+    -fx-text-fill: #b0bec5;
+}
+
+.libro-estado, .libro-fecha, .libro-nota {
+    -fx-text-fill: #b3e5fc;
+}
+
+.libro-comentario {
+    -fx-text-fill: #cfd8dc;
+}
+
+.libro-prestamo {
+    -fx-text-fill: #ffd54f;
+}
+
+.no-results {
+    -fx-text-fill: white;
+}

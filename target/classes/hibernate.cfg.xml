@@ -17,6 +17,7 @@
         <!-- Mapear tus clases -->
         <mapping class="models.Usuario"/>
         <mapping class="models.Libro"/>
+        <mapping class="models.Opinion"/>
         
     </session-factory>
 </hibernate-configuration>

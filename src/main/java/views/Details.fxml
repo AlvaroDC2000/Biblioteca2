@@ -13,7 +13,7 @@
                     AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
 
             <left>
-                <VBox alignment="TOP_CENTER" prefHeight="693.0" prefWidth="212.0" spacing="20.0"
+                <VBox alignment="TOP_CENTER" prefWidth="212.0" spacing="20.0"
                       style="-fx-background-color: #1e3a5f;">
                     <VBox alignment="CENTER" spacing="10">
                         <padding>
@@ -41,7 +41,7 @@
 
                     <Label styleClass="label-title" text="Detalles del libro"/>
 
-                    <ScrollPane fitToWidth="true" fitToHeight="true" prefHeight="542.0">
+                    <ScrollPane fitToWidth="true" fitToHeight="false" vbarPolicy="AS_NEEDED">
                         <content>
                             <VBox fx:id="detailsContainer" spacing="15" alignment="TOP_CENTER"
                                   style="-fx-background-color: #1e3a5f;" prefWidth="700">
@@ -53,7 +53,15 @@
                                 <Label fx:id="titleLabel" styleClass="label-title"/>
                                 <Label fx:id="authorLabel" style="-fx-text-fill: white;"/>
                                 <Label fx:id="editorialLabel" style="-fx-text-fill: white;"/>
-                                <Label fx:id="descriptionLabel" wrapText="true" style="-fx-text-fill: white;" maxWidth="600"/>
+
+                                <Label text="Descripción:" style="-fx-text-fill: white;"/>
+                                <TextArea fx:id="descriptionArea" wrapText="true" editable="false"
+                                          style="-fx-control-inner-background: #1e3a5f; -fx-text-fill: white;"
+                                          prefWidth="600" prefHeight="500"/>
+
+                                <Label text="Comentario personal:" style="-fx-text-fill: white;"/>
+                                <TextArea fx:id="comentarioArea" promptText="Escribe tu comentario personal..." wrapText="true"
+                                          prefWidth="600" prefHeight="100"/>
 
                                 <HBox spacing="10" alignment="CENTER">
                                     <Label text="Estado:" style="-fx-text-fill: white;"/>
@@ -64,15 +72,6 @@
                                     <Label text="Fecha de lectura:" style="-fx-text-fill: white;"/>
                                     <DatePicker fx:id="fechaLecturaPicker"/>
                                 </HBox>
-
-                                <HBox spacing="10" alignment="CENTER">
-                                    <Label text="Nota (0-10):" style="-fx-text-fill: white;"/>
-                                    <Spinner fx:id="notaSpinner" prefWidth="80"/>
-                                </HBox>
-
-                                <Label text="Comentario personal:" style="-fx-text-fill: white;"/>
-                                <TextArea fx:id="comentarioArea" promptText="Escribe tu opinión..." wrapText="true"
-                                          prefWidth="600" prefHeight="100"/>
 
                                 <HBox spacing="10" alignment="CENTER">
                                     <Label text="Prestado a:" style="-fx-text-fill: white;"/>
@@ -90,6 +89,32 @@
                                 </HBox>
 
                                 <Button text="Guardar en Mi Biblioteca" onAction="#handleSaveToLibrary"
+                                        styleClass="button button-primary"/>
+
+                                <Label text="Opiniones de otros lectores" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+                                <ScrollPane fitToWidth="true" prefHeight="300" style="-fx-background: transparent;">
+                                    <content>
+                                        <VBox fx:id="opinionesContainer" spacing="10" alignment="TOP_LEFT"/>
+                                    </content>
+                                </ScrollPane>
+
+                                <Label text="Tu opinión:" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Nombre:" style="-fx-text-fill: white;"/>
+                                    <TextField fx:id="autorOpinionField" promptText="Tu nombre" prefWidth="200"/>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <Label text="Nota:" style="-fx-text-fill: white;"/>
+                                    <Spinner fx:id="notaOpinionSpinner" prefWidth="80"/>
+                                </HBox>
+
+                                <Label text="Comentario:" style="-fx-text-fill: white;"/>
+                                <TextArea fx:id="contenidoOpinionArea" promptText="Escribe tu opinión..." wrapText="true"
+                                          prefWidth="600" prefHeight="100"/>
+
+                                <Button text="Publicar opinión" onAction="#handleAgregarOpinion"
                                         styleClass="button button-primary"/>
                             </VBox>
                         </content>
