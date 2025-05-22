@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefWidth="957.0" prefHeight="693.0"
+            stylesheets="@../styles/styles.css"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.AddLibroController">
+
+    <children>
+        <BorderPane AnchorPane.topAnchor="0"
+                    AnchorPane.bottomAnchor="0"
+                    AnchorPane.leftAnchor="0"
+                    AnchorPane.rightAnchor="0">
+
+            <left>
+                <VBox prefWidth="212.0" spacing="20" style="-fx-background-color: #1e3a5f;"
+                      alignment="TOP_CENTER">
+                    <VBox spacing="10" alignment="CENTER">
+                        <padding>
+                            <Insets top="10" bottom="10" left="10" right="10"/>
+                        </padding>
+                        <ImageView fx:id="drawerLogo" fitWidth="100" fitHeight="80" preserveRatio="true">
+                            <VBox.margin>
+                                <Insets top="20" bottom="80"/>
+                            </VBox.margin>
+                        </ImageView>
+                    </VBox>
+                    <Button text="Buscar"           onAction="#handleShowBuscar"           prefWidth="195"/>
+                    <Button text="Recomendaciones" onAction="#handleShowRecomendaciones" prefWidth="195"/>
+                    <Button text="Mi Biblioteca"    onAction="#handleShowBiblioteca"      prefWidth="195"/>
+                    <Button text="Perfil"           onAction="#handleShowPerfil"          prefWidth="195"/>
+                    <Button text="Cerrar sesión"    onAction="#handleLogout"              prefWidth="195"/>
+                </VBox>
+            </left>
+
+            <center>
+                <VBox alignment="TOP_CENTER" spacing="20">
+                    <padding>
+                        <Insets top="30" right="20" bottom="20" left="20"/>
+                    </padding>
+
+                    <Label text="Añadir libro manualmente" styleClass="label-title"/>
+
+                    <VBox styleClass="card-add-libro"
+                          alignment="TOP_CENTER"
+                          spacing="15"
+                          maxWidth="600"
+                          prefWidth="600">
+                        <padding>
+                            <Insets top="25" right="30" bottom="25" left="30"/>
+                        </padding>
+
+                        <TextField fx:id="tituloField"
+                                   promptText="Título del libro"
+                                   prefWidth="540"/>
+                        <TextField fx:id="autorField"
+                                   promptText="Autor"
+                                   prefWidth="540"/>
+                        <TextField fx:id="editorialField"
+                                   promptText="Editorial"
+                                   prefWidth="540"/>
+                        <TextArea fx:id="descripcionField"
+                                  promptText="Descripción"
+                                  wrapText="true"
+                                  prefWidth="540"
+                                  prefHeight="80"/>
+                        <TextField fx:id="imagenUrlField"
+                                   promptText="URL de la imagen de portada"
+                                   prefWidth="540"/>
+
+                        <HBox alignment="CENTER_RIGHT" spacing="15">
+                            <Button text="Cancelar"
+                                    onAction="#handleCancelar"
+                                    styleClass="button-cancel"/>
+                            <Button text="Guardar libro"
+                                    onAction="#handleGuardarLibro"
+                                    styleClass="button button-primary"/>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </center>
+
+        </BorderPane>
+    </children>
+</AnchorPane>
+

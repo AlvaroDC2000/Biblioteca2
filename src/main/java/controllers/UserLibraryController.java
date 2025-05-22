@@ -177,6 +177,12 @@ public class UserLibraryController implements Initializable {
           e.printStackTrace();
       }
   }
+  
+  // Método para ir a la pantalla addlibro
+  @FXML
+  private void handleShowAddLibro() {
+      cambiarPantalla("/views/AddLibro.fxml");
+  }
 
   // Métodos de navegación desde el Drawer
   @FXML private void handleShowBuscar() { 
@@ -194,6 +200,9 @@ public class UserLibraryController implements Initializable {
   @FXML private void handleShowPerfil() { 
       cambiarPantalla("/views/Profile.fxml");
   }
+  
+  
+
 
   // Cierra sesión y vuelve a la pantalla de login
   @FXML

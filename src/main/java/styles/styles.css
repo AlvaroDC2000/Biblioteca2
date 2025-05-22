@@ -158,3 +158,14 @@
 .no-results {
     -fx-text-fill: white;
 }
+
+.form-card {
+    -fx-background-color: #1e3a5f;
+    -fx-padding: 30;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255,255,255,0.2);
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 12, 0.2, 0, 4);
+}
+
