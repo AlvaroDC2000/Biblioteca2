@@ -1,6 +1,7 @@
 package controllers;
 
 import dao.UsuarioDAO;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -12,72 +13,52 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import models.Usuario;
 import utils.SessionManager;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * Controlador para la pantalla de "Mi Perfil".
  * <p>
  * Muestra los datos del usuario (email y género favorito),
- * permite cambiar su contraseña y eliminar la cuenta.
+ * permite editar y guardar el género favorito,
+ * cambiar su contraseña y eliminar la cuenta.
  * También maneja la navegación lateral.
  * </p>
  */
 public class ProfileController implements Initializable {
 
-    /** Logo que aparece en el menú lateral. */
-    @FXML
-    private ImageView drawerLogo;
+    @FXML private ImageView drawerLogo;
+    @FXML private TextField emailField;
+    @FXML private ComboBox<String> generoComboBox;
+    @FXML private PasswordField nuevaPassField;
+    @FXML private PasswordField repitePassField;
 
-    /** Campo de texto que muestra el email del usuario (no editable). */
-    @FXML
-    private TextField emailField;
-
-    /** Campo de texto que muestra el género favorito del usuario (no editable). */
-    @FXML
-    private TextField generoField;
-
-    /** Campo para introducir la nueva contraseña. */
-    @FXML
-    private PasswordField nuevaPassField;
-
-    /** Campo para repetir la nueva contraseña. */
-    @FXML
-    private PasswordField repitePassField;
-
-    /** Usuario actualmente logueado. */
     private Usuario usuario;
 
-    /**
-     * Inicializa el controlador una vez cargado el FXML.
-     * <ul>
-     *   <li>Carga el logo en el ImageView.</li>
-     *   <li>Recupera y muestra los datos del usuario actual.</li>
-     * </ul>
-     *
-     * @param location  URL del recurso (no usado)
-     * @param resources Bundle de recursos (no usado)
-     */
+    private static final String GOOGLE_BOOKS_API = "https://www.googleapis.com/books/v1/volumes?q=bestseller&maxResults=30&langRestrict=es";
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         cargarLogo();
         cargarDatosUsuario();
+        cargarGenerosDesdeAPI();
     }
 
-    /**
-     * Descarga y asigna la imagen del logo al {@link #drawerLogo}.
-     * En caso de fallo, imprime el stack trace en consola.
-     */
     private void cargarLogo() {
         try {
             URL url = new URI(
                 "https://upload.wikimedia.org/wikipedia/commons/thumb/"
-              + "c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png"
+               + "c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png"
             ).toURL();
             URLConnection conn = url.openConnection();
             conn.setRequestProperty("User-Agent", "Mozilla/5.0");
@@ -89,142 +70,134 @@ public class ProfileController implements Initializable {
         }
     }
 
-    /**
-     * Carga los datos del usuario actual desde {@link SessionManager}
-     * y los muestra en los campos correspondientes.
-     */
     private void cargarDatosUsuario() {
         usuario = SessionManager.getUsuarioActual();
         if (usuario != null) {
             emailField.setText(usuario.getEmail());
-            generoField.setText(usuario.getGeneroFavorito());
+            // Luego de cargar géneros, seleccionamos el actual:
+            Platform.runLater(() -> generoComboBox.setValue(usuario.getGeneroFavorito()));
         }
     }
 
     /**
-     * Maneja la acción de cambiar la contraseña.
-     * <ol>
-     *   <li>Valida longitud mínima de 6 caracteres.</li>
-     *   <li>Comprueba que las dos contraseñas coincidan.</li>
-     *   <li>Actualiza la entidad en BD mediante {@link UsuarioDAO}.</li>
-     *   <li>Notifica al usuario del resultado.</li>
-     * </ol>
+     * Lanza un hilo para pedir las categorías a Google Books y
+     * rellenar el ComboBox.
      */
-    @FXML
-    private void handleChangePassword() {
-        String pass1 = nuevaPassField.getText();
-        String pass2 = repitePassField.getText();
+    private void cargarGenerosDesdeAPI() {
+        new Thread(() -> {
+            Set<String> generos = new TreeSet<>();
+            try {
+                HttpURLConnection conn = (HttpURLConnection) new URL(GOOGLE_BOOKS_API).openConnection();
+                conn.setRequestMethod("GET");
+                BufferedReader rd = new BufferedReader(
+                    new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8)
+                );
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = rd.readLine()) != null) sb.append(line);
+                rd.close();
 
-        if (pass1.length() < 6) {
-            showAlert(Alert.AlertType.WARNING, "La nueva contraseña debe tener al menos 6 caracteres.");
+                JSONObject json = new JSONObject(sb.toString());
+                JSONArray items = json.optJSONArray("items");
+                if (items != null) {
+                    for (int i = 0; i < items.length(); i++) {
+                        JSONObject vi = items.getJSONObject(i).getJSONObject("volumeInfo");
+                        if (vi.has("categories")) {
+                            JSONArray cats = vi.getJSONArray("categories");
+                            for (int j = 0; j < cats.length(); j++) {
+                                generos.add(cats.getString(j));
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            Platform.runLater(() -> {
+                if (generos.isEmpty()) {
+                    generoComboBox.getItems().add("General");
+                } else {
+                    generoComboBox.getItems().addAll(generos);
+                }
+                // Si ya había usuario cargado, restablecer selección:
+                if (usuario != null) {
+                    generoComboBox.setValue(usuario.getGeneroFavorito());
+                }
+            });
+        }).start();
+    }
+
+    /** Guarda el género favorito editado por el usuario. */
+    @FXML
+    private void handleSaveGenero() {
+        String nuevo = generoComboBox.getValue();
+        if (nuevo == null || nuevo.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Selecciona un género.");
             return;
         }
-        if (!pass1.equals(pass2)) {
+        usuario.setGeneroFavorito(nuevo);
+        UsuarioDAO.updateUsuario(usuario);
+        showAlert(Alert.AlertType.INFORMATION, "Género favorito actualizado.");
+    }
+
+    /** Cambia la contraseña validando longitud y coincidencia. */
+    @FXML
+    private void handleChangePassword() {
+        String p1 = nuevaPassField.getText(), p2 = repitePassField.getText();
+        if (p1.length() < 6) {
+            showAlert(Alert.AlertType.WARNING, "La contraseña debe tener 6+ caracteres.");
+            return;
+        }
+        if (!p1.equals(p2)) {
             showAlert(Alert.AlertType.WARNING, "Las contraseñas no coinciden.");
             return;
         }
-
-        usuario.setPassword(pass1);
+        usuario.setPassword(p1);
         UsuarioDAO.updateUsuario(usuario);
-        showAlert(Alert.AlertType.INFORMATION, "Contraseña cambiada correctamente.");
+        showAlert(Alert.AlertType.INFORMATION, "Contraseña cambiada.");
         nuevaPassField.clear();
         repitePassField.clear();
     }
 
-    /**
-     * Maneja la acción de eliminar la cuenta.
-     * <ol>
-     *   <li>Pide confirmación al usuario.</li>
-     *   <li>Si confirma, elimina la cuenta de BD y borra la sesión.</li>
-     *   <li>Redirige al login.</li>
-     * </ol>
-     */
+    /** Elimina la cuenta tras pedir confirmación. */
     @FXML
     private void handleDeleteAccount() {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Eliminar cuenta");
-        confirm.setHeaderText("¿Seguro que deseas eliminar tu cuenta?");
-        confirm.setContentText("Esta acción no se puede deshacer.");
-
-        Optional<ButtonType> choice = confirm.showAndWait();
-        if (choice.orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            UsuarioDAO.deleteUsuario(usuario);
+        Alert c = new Alert(Alert.AlertType.CONFIRMATION,
+            "Esta acción no se puede deshacer.", ButtonType.CANCEL, ButtonType.OK);
+        c.setHeaderText("¿Eliminar cuenta?");
+        Optional<ButtonType> opt = c.showAndWait();
+        if (opt.orElse(ButtonType.CANCEL) == ButtonType.OK) {
+            dao.UsuarioDAO.deleteUsuario(usuario);
             SessionManager.clear();
             volverALogin();
         }
     }
 
-    /**
-     * Muestra una ventana de alerta con el tipo y mensaje especificados.
-     *
-     * @param tipo Tipo de alerta ({@link Alert.AlertType})
-     * @param msg  Mensaje a mostrar
-     */
-    private void showAlert(Alert.AlertType tipo, String msg) {
-        Alert alert = new Alert(tipo);
-        alert.setTitle(null);
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.showAndWait();
+    private void showAlert(Alert.AlertType t, String m) {
+        Alert a = new Alert(t); a.setHeaderText(null); a.setContentText(m); a.showAndWait();
     }
 
-    /**
-     * Redirige al usuario a la pantalla de login y actualiza el Stage.
-     */
     private void volverALogin() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/LoginDataPane.fxml"));
-            AnchorPane loginPane = loader.load();
-            Stage stage = (Stage) drawerLogo.getScene().getWindow();
-            stage.setScene(new Scene(loginPane));
-            stage.setTitle("Biblioteca");
-            stage.show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            AnchorPane pane = FXMLLoader.load(getClass().getResource("/views/LoginDataPane.fxml"));
+            Stage st = (Stage) drawerLogo.getScene().getWindow();
+            st.setScene(new Scene(pane)); st.setTitle("Biblioteca"); st.show();
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
-    /* ————— Navegación lateral ————— */
+    /* — Navegación lateral — */
+    @FXML private void handleShowBuscar()          { cambiar("/views/HomePane.fxml"); }
+    @FXML private void handleShowRecomendaciones() { cambiar("/views/Recomendations.fxml"); }
+    @FXML private void handleShowBiblioteca()      { cambiar("/views/UserLibrary.fxml"); }
+    @FXML private void handleShowPerfil()          { /* ya estás */ }
+    @FXML private void handleLogout()              { SessionManager.clear(); volverALogin(); }
 
-    /** Navega a la pantalla de búsqueda de libros. */
-    @FXML private void handleShowBuscar()           { 
-      cambiarPantalla("/views/HomePane.fxml");
-      }
-
-    /** Navega a la pantalla de recomendaciones. */
-    @FXML private void handleShowRecomendaciones()  {
-      cambiarPantalla("/views/Recomendations.fxml");
-      }
-
-    /** Navega a la pantalla de "Mi Biblioteca". */
-    @FXML private void handleShowBiblioteca()       {
-      cambiarPantalla("/views/UserLibrary.fxml");
-      }
-
-    /** Navega a la propia pantalla de perfil (esta vista). */
-    @FXML private void handleShowPerfil()           {
-      cambiarPantalla("/views/Profile.fxml");
-      }
-
-    /** Cierra la sesión y vuelve al login. */
-    @FXML private void handleLogout() {
-        SessionManager.clear();
-        volverALogin();
-    }
-
-    /**
-     * Método helper para cambiar la vista actual.
-     *
-     * @param ruta Ruta del FXML destino (p.e. "/views/HomePane.fxml")
-     */
-    private void cambiarPantalla(String ruta) {
+    private void cambiar(String r) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(ruta));
-            AnchorPane root = loader.load();
-            Stage stage = (Stage) drawerLogo.getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            AnchorPane p = FXMLLoader.load(getClass().getResource(r));
+            Stage st = (Stage) drawerLogo.getScene().getWindow();
+            st.getScene().setRoot(p);
+        } catch (Exception e) { e.printStackTrace(); }
     }
 }

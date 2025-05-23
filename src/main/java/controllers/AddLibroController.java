@@ -149,16 +149,24 @@ public class AddLibroController implements Initializable {
 
 
     /** Navega a la vista de búsqueda de libros */
-    @FXML private void handleShowBuscar()           { cambiarPantalla("/views/HomePane.fxml");        }
+    @FXML private void handleShowBuscar()           {
+      cambiarPantalla("/views/HomePane.fxml");
+      }
 
     /** Navega a la vista de recomendaciones */
-    @FXML private void handleShowRecomendaciones()  { cambiarPantalla("/views/Recomendations.fxml");  }
+    @FXML private void handleShowRecomendaciones()  {
+      cambiarPantalla("/views/Recomendations.fxml");
+      }
 
     /** Navega a la vista de "Mi Biblioteca" */
-    @FXML private void handleShowBiblioteca()       { cambiarPantalla("/views/UserLibrary.fxml");     }
+    @FXML private void handleShowBiblioteca()       {
+      cambiarPantalla("/views/UserLibrary.fxml");
+      }
 
     /** Navega a la vista de perfil de usuario */
-    @FXML private void handleShowPerfil()           { cambiarPantalla("/views/Profile.fxml");         }
+    @FXML private void handleShowPerfil()           {
+      cambiarPantalla("/views/Profile.fxml");
+      }
 
     /**
      * Cierra la sesión actual y vuelve al login.

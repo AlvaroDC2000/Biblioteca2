@@ -8,21 +8,18 @@
 <AnchorPane prefHeight="693.0" prefWidth="957.0" stylesheets="@../styles/styles.css"
             xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.DetailsController">
-    <children>
-        <BorderPane fx:id="mainBorder" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
-                    AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
 
+    <children>
+        <BorderPane fx:id="mainBorder" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                    AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+            <!-- Menú lateral -->
             <left>
                 <VBox alignment="TOP_CENTER" prefWidth="212.0" spacing="20.0"
                       style="-fx-background-color: #1e3a5f;">
                     <VBox alignment="CENTER" spacing="10">
-                        <padding>
-                            <Insets bottom="10" left="10" right="10" top="10"/>
-                        </padding>
-                        <ImageView fx:id="drawerLogo" fitHeight="80.0" fitWidth="100.0" preserveRatio="true">
-                            <VBox.margin>
-                                <Insets bottom="80.0" top="20.0"/>
-                            </VBox.margin>
+                        <padding><Insets top="10" bottom="10" left="10" right="10"/></padding>
+                        <ImageView fx:id="drawerLogo" fitHeight="80" fitWidth="100" preserveRatio="true">
+                            <VBox.margin><Insets top="20" bottom="80"/></VBox.margin>
                         </ImageView>
                     </VBox>
                     <Button onAction="#handleShowBuscar" prefWidth="195.0" text="Buscar"/>
@@ -34,85 +31,85 @@
             </left>
 
             <center>
-                <VBox alignment="TOP_CENTER" spacing="20">
-                    <padding>
-                        <Insets top="20" right="20" bottom="20" left="20"/>
-                    </padding>
+                <VBox alignment="TOP_LEFT" spacing="15.0">
+                    <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
 
-                    <Label styleClass="label-title" text="Detalles del libro"/>
+                    <Label styleClass="label-title" text="Detalles del libro" />
 
                     <ScrollPane fitToWidth="true" fitToHeight="false" vbarPolicy="AS_NEEDED">
                         <content>
-                            <VBox fx:id="detailsContainer" spacing="15" alignment="TOP_CENTER"
+                            <VBox fx:id="detailsContainer" spacing="15" alignment="TOP_LEFT"
                                   style="-fx-background-color: #1e3a5f;" prefWidth="700">
-                                <padding>
-                                    <Insets top="20" bottom="20" left="20" right="20"/>
-                                </padding>
+                                <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                                <ImageView fx:id="bookImage" fitWidth="120" preserveRatio="true"/>
+                                <Label fx:id="titleLabel" styleClass="detail-title" wrapText="true"/>
+                                <Label fx:id="authorLabel" styleClass="detail-text"/>
+                                <Label fx:id="editorialLabel" styleClass="detail-text"/>
 
-                                <ImageView fx:id="bookImage" fitWidth="150" preserveRatio="true"/>
-                                <Label fx:id="titleLabel" styleClass="label-title"/>
-                                <Label fx:id="authorLabel" style="-fx-text-fill: white;"/>
-                                <Label fx:id="editorialLabel" style="-fx-text-fill: white;"/>
-
-                                <Label text="Descripción:" style="-fx-text-fill: white;"/>
+                                <Label text="Descripción:" styleClass="detail-label"/>
                                 <TextArea fx:id="descriptionArea" wrapText="true" editable="false"
-                                          style="-fx-control-inner-background: #1e3a5f; -fx-text-fill: white;"
-                                          prefWidth="600" prefHeight="500"/>
+                                          styleClass="detail-description"
+                                          prefWidth="660" prefHeight="150"/>
 
-                                <Label text="Comentario personal:" style="-fx-text-fill: white;"/>
-                                <TextArea fx:id="comentarioArea" promptText="Escribe tu comentario personal..." wrapText="true"
-                                          prefWidth="600" prefHeight="100"/>
+                                <Label text="Comentario personal:" styleClass="detail-label"/>
+                                <TextArea fx:id="comentarioArea" promptText="Escribe tu comentario personal..."
+                                          wrapText="true"
+                                          styleClass="detail-input"
+                                          prefWidth="660" prefHeight="80"/>
 
-                                <HBox spacing="10" alignment="CENTER">
-                                    <Label text="Estado:" style="-fx-text-fill: white;"/>
-                                    <ComboBox fx:id="estadoCombo" promptText="Seleccionar estado"/>
-                                </HBox>
+                                <GridPane hgap="10" vgap="12">
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="LEFT" percentWidth="30"/>
+                                        <ColumnConstraints halignment="LEFT" percentWidth="70"/>
+                                    </columnConstraints>
 
-                                <HBox spacing="10" alignment="CENTER">
-                                    <Label text="Fecha de lectura:" style="-fx-text-fill: white;"/>
-                                    <DatePicker fx:id="fechaLecturaPicker"/>
-                                </HBox>
+                                    <RowConstraints percentHeight="10"/>
+                                    <RowConstraints percentHeight="10"/>
+                                    <RowConstraints percentHeight="10"/>
+                                    <RowConstraints percentHeight="10"/>
+                                    <RowConstraints percentHeight="10"/>
 
-                                <HBox spacing="10" alignment="CENTER">
-                                    <Label text="Prestado a:" style="-fx-text-fill: white;"/>
-                                    <TextField fx:id="prestadoAField" promptText="Nombre de la persona"/>
-                                </HBox>
+                                    <Label text="Estado:" styleClass="detail-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <ComboBox fx:id="estadoCombo" promptText="Seleccionar estado"
+                                              styleClass="detail-input" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                                <HBox spacing="10" alignment="CENTER">
-                                    <Label text="Fecha préstamo:" style="-fx-text-fill: white;"/>
-                                    <DatePicker fx:id="fechaPrestamoPicker"/>
-                                </HBox>
+                                    <Label text="Fecha lectura:" styleClass="detail-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <DatePicker fx:id="fechaLecturaPicker" styleClass="detail-input" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                                <HBox spacing="10" alignment="CENTER">
-                                    <Label text="¿Devuelto?" style="-fx-text-fill: white;"/>
-                                    <CheckBox fx:id="devueltoCheck"/>
-                                </HBox>
+                                    <Label text="Prestado a:" styleClass="detail-label" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="prestadoAField" promptText="Nombre de persona"
+                                               styleClass="detail-input" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+                                    <Label text="Fecha préstamo:" styleClass="detail-label" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                                    <DatePicker fx:id="fechaPrestamoPicker" styleClass="detail-input" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+                                    <Label text="Devuelto:" styleClass="detail-label" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                                    <CheckBox fx:id="devueltoCheck" styleClass="detail-input" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+                                </GridPane>
 
                                 <Button text="Guardar en Mi Biblioteca" onAction="#handleSaveToLibrary"
                                         styleClass="button button-primary"/>
 
-                                <Label text="Opiniones de otros lectores" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
-                                <ScrollPane fitToWidth="true" prefHeight="300" style="-fx-background: transparent;">
-                                    <content>
-                                        <VBox fx:id="opinionesContainer" spacing="10" alignment="TOP_LEFT"/>
-                                    </content>
-                                </ScrollPane>
+                                <Label text="Opiniones de otros lectores" styleClass="detail-section"/>
+                                <VBox fx:id="opinionesContainer" spacing="10" alignment="TOP_LEFT"/>
 
-                                <Label text="Tu opinión:" style="-fx-text-fill: white; -fx-font-size: 14px;"/>
+                                <Separator/>
+                                <Label text="Tu opinión:" styleClass="detail-section"/>
+                                <GridPane hgap="10" vgap="12">
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="LEFT" percentWidth="30"/>
+                                        <ColumnConstraints halignment="LEFT" percentWidth="70"/>
+                                    </columnConstraints>
 
-                                <HBox spacing="10" alignment="CENTER_LEFT">
-                                    <Label text="Nombre:" style="-fx-text-fill: white;"/>
-                                    <TextField fx:id="autorOpinionField" promptText="Tu nombre" prefWidth="200"/>
-                                </HBox>
+                                    <Label text="Nota:" styleClass="detail-label" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <Spinner fx:id="notaOpinionSpinner" styleClass="detail-input" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                                <HBox spacing="10" alignment="CENTER_LEFT">
-                                    <Label text="Nota:" style="-fx-text-fill: white;"/>
-                                    <Spinner fx:id="notaOpinionSpinner" prefWidth="80"/>
-                                </HBox>
-
-                                <Label text="Comentario:" style="-fx-text-fill: white;"/>
-                                <TextArea fx:id="contenidoOpinionArea" promptText="Escribe tu opinión..." wrapText="true"
-                                          prefWidth="600" prefHeight="100"/>
+                                    <Label text="Comentario:" styleClass="detail-label" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <TextArea fx:id="contenidoOpinionArea" promptText="Escribe tu opinión..."
+                                              wrapText="true" styleClass="detail-input"
+                                              prefWidth="660" prefHeight="80"
+                                              GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                </GridPane>
 
                                 <Button text="Publicar opinión" onAction="#handleAgregarOpinion"
                                         styleClass="button button-primary"/>
