@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -13,232 +14,304 @@ import models.Libro;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * Controlador de la vista principal de búsqueda de libros.
+ * <p>
+ * Gestiona la carga del logo, la captura de la consulta de búsqueda,
+ * la ejecución de peticiones a la API de Google Books, el parseo de
+ * resultados JSON y la renderización de tarjetas de libro en la UI.
+ * También proporciona navegación entre las distintas pantallas.
+ * </p>
+ */
 public class HomePaneController implements Initializable {
 
-  // Campo de búsqueda, contenedor de resultados y logo lateral
-  @FXML private TextField searchField;
-  @FXML private VBox resultsContainer;
-  @FXML private ImageView drawerLogo;
+    /** Campo de texto donde el usuario ingresa la consulta de búsqueda. */
+    @FXML private TextField searchField;
 
-  // Método que se ejecuta al cargar la vista
-  @Override
-  public void initialize(URL location, ResourceBundle resources) {
-      // Cargar el logo de la aplicación desde una URL externa
-      try {
-          URL url = new URI("https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png").toURL();
-          URLConnection connection = url.openConnection();
-          connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-          try (InputStream inputStream = connection.getInputStream()) {
-              drawerLogo.setImage(new Image(inputStream));
-          }
-      } catch (Exception e) {
-          e.printStackTrace();
-      }
+    /** Contenedor VBox donde se añaden las tarjetas de resultados. */
+    @FXML private VBox resultsContainer;
 
-      // Al iniciar, mostrar libros populares por defecto
-      buscarLibros("bestseller&orderBy=relevance");
-  }
+    /** Imagen del logo que se muestra en el menú lateral. */
+    @FXML private ImageView drawerLogo;
 
-  // Acción del botón de búsqueda: toma el texto del campo y lanza la búsqueda
-  @FXML
-  private void handleSearch() {
-      String query = searchField.getText().trim();
-      if (!query.isEmpty()) {
-          buscarLibros(query);
-      }
-  }
+    /**
+     * Se ejecuta al inicializar el controlador.
+     * <p>
+     * Carga el logo desde una URL, y lanza una búsqueda por defecto
+     * para mostrar libros populares al inicio.
+     * </p>
+     *
+     * @param location  ubicación del recurso FXML (no usado)
+     * @param resources bundle de recursos (no usado)
+     */
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        // Cargar logo de la aplicación
+        try {
+            URL url = new URI(
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/"
+              + "c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png"
+            ).toURL();
+            URLConnection connection = url.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            try (InputStream inputStream = connection.getInputStream()) {
+                drawerLogo.setImage(new Image(inputStream));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-  // Realiza la búsqueda de libros usando la API de Google Books
-  private void buscarLibros(String consulta) {
-      resultsContainer.getChildren().clear(); // Limpiar resultados anteriores
+        // Mostrar inicialmente libros por relevancia
+        buscarLibros("bestseller&orderBy=relevance");
+    }
 
-      // Construcción de la URL de búsqueda
-      String urlStr = "https://www.googleapis.com/books/v1/volumes?q=" +
-              URLEncoder.encode(consulta, StandardCharsets.UTF_8) +
-              "&maxResults=20&langRestrict=es";
+    /**
+     * Manejador del botón de búsqueda.
+     * <p>
+     * Toma el texto ingresado, lo valida y llama al método de búsqueda.
+     * </p>
+     */
+    @FXML
+    private void handleSearch() {
+        String query = searchField.getText().trim();
+        if (!query.isEmpty()) {
+            buscarLibros(query);
+        }
+    }
 
-      // Petición HTTP en un hilo separado para no bloquear la interfaz
-      new Thread(() -> {
-          try {
-              URL url = URI.create(urlStr).toURL();
-              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-              conn.setRequestMethod("GET");
+    /**
+     * Ejecuta una búsqueda en Google Books y renderiza los resultados.
+     * <p>
+     * Construye la URL con parámetros, lanza la petición en un hilo aparte
+     * para no bloquear la UI, parsea el JSON y añade tarjetas al VBox.
+     * </p>
+     *
+     * @param consulta cadena de búsqueda (título, autor, etc.)
+     */
+    private void buscarLibros(String consulta) {
+        // Limpia resultados previos
+        resultsContainer.getChildren().clear();
 
-              BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-              StringBuilder result = new StringBuilder();
-              String line;
-              while ((line = reader.readLine()) != null) {
-                  result.append(line);
-              }
-              reader.close();
+        // Monta la URL con parámetros de búsqueda y encoding UTF-8
+        String urlStr = "https://www.googleapis.com/books/v1/volumes?q=" +
+            URLEncoder.encode(consulta, StandardCharsets.UTF_8) +
+            "&maxResults=20&langRestrict=es";
 
-              // Parsear JSON de la respuesta
-              JSONObject json = new JSONObject(result.toString());
-              JSONArray items = json.optJSONArray("items");
+        // Nueva hebra para la petición HTTP
+        new Thread(() -> {
+            try {
+                // Abrir conexión y leer respuesta
+                URL url = URI.create(urlStr).toURL();
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
 
-              // Mostrar los resultados en la interfaz
-              Platform.runLater(() -> {
-                  if (items != null && items.length() > 0) {
-                      for (int i = 0; i < items.length(); i++) {
-                          JSONObject volumeInfo = items.getJSONObject(i).getJSONObject("volumeInfo");
+                try (BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder result = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
 
-                          // Obtener datos básicos del libro
-                          String title = volumeInfo.optString("title", "Sin título");
-                          String editorial = volumeInfo.optString("publisher", "Desconocida");
-                          String descripcion = volumeInfo.optString("description", "Sin descripción.");
-                          String imagenUrl = "";
+                    // Parsear JSON de la respuesta
+                    JSONObject json = new JSONObject(result.toString());
+                    JSONArray items = json.optJSONArray("items");
 
-                          // Obtener miniatura si está disponible
-                          if (volumeInfo.has("imageLinks")) {
-                              imagenUrl = volumeInfo.getJSONObject("imageLinks")
-                                          .optString("smallThumbnail", "")
-                                          .replace("http://", "https://")
-                                          .replace("&edge=curl", "")
-                                          .replace("zoom=1", "zoom=2");
-                          }
+                    // Actualizar UI en hilo de JavaFX
+                    Platform.runLater(() -> {
+                        if (items != null && items.length() > 0) {
+                            // Para cada elemento de items, crear tarjeta
+                            for (int i = 0; i < items.length(); i++) {
+                                JSONObject volumeInfo = items
+                                    .getJSONObject(i)
+                                    .getJSONObject("volumeInfo");
 
-                          // Obtener autores si hay
-                          String tempAuthors = "Autor desconocido";
-                          if (volumeInfo.has("authors")) {
-                              JSONArray authorsArray = volumeInfo.getJSONArray("authors");
-                              List<String> authorList = new ArrayList<>();
-                              for (int j = 0; j < authorsArray.length(); j++) {
-                                  authorList.add(authorsArray.getString(j));
-                              }
-                              tempAuthors = String.join(", ", authorList);
-                          }
+                                // Extraer datos básicos
+                                String title = volumeInfo.optString("title", "Sin título");
+                                String editorial = volumeInfo.optString("publisher", "Desconocida");
+                                String descripcion = volumeInfo.optString("description", "Sin descripción.");
+                                String imagenUrl = "";
+                                if (volumeInfo.has("imageLinks")) {
+                                    imagenUrl = volumeInfo
+                                        .getJSONObject("imageLinks")
+                                        .optString("smallThumbnail", "")
+                                        .replace("http://", "https://")
+                                        .replace("&edge=curl", "")
+                                        .replace("zoom=1", "zoom=2");
+                                }
 
-                          // Variables finales para usar dentro del hilo UI
-                          final String authors = tempAuthors;
-                          final String finalEditorial = editorial;
-                          final String finalDescripcion = descripcion;
-                          final String finalImagenUrl = imagenUrl;
+                                // Extraer lista de autores
+                                String tempAuthors = "Autor desconocido";
+                                if (volumeInfo.has("authors")) {
+                                    JSONArray authorsArray = volumeInfo.getJSONArray("authors");
+                                    List<String> authorList = new ArrayList<>();
+                                    for (int j = 0; j < authorsArray.length(); j++) {
+                                        authorList.add(authorsArray.getString(j));
+                                    }
+                                    tempAuthors = String.join(", ", authorList);
+                                }
 
-                          // Crear una tarjeta visual para el libro
-                          VBox card = new VBox(5);
-                          card.getStyleClass().add("card-libro");
-                          card.setPrefWidth(640);
+                                // Variables finales inmutables para la lambda
+                                final String authors = tempAuthors;
+                                final String finalEditorial = editorial;
+                                final String finalDescripcion = descripcion;
+                                final String finalImagenUrl = imagenUrl;
 
-                          ImageView portada = new ImageView();
-                          portada.setFitWidth(100);
-                          portada.setPreserveRatio(true);
+                                // Crear tarjeta (VBox) y estilos
+                                VBox card = new VBox(5);
+                                card.getStyleClass().add("card-libro");
+                                card.setPrefWidth(640);
 
-                          // Cargar imagen desde la URL si existe
-                          if (finalImagenUrl != null && !finalImagenUrl.isEmpty()) {
-                              try {
-                                  URI uri = URI.create(finalImagenUrl);
-                                  HttpRequest request = HttpRequest.newBuilder(uri)
-                                          .header("User-Agent", "Mozilla/5.0")
-                                          .build();
+                                // Imagen de portada
+                                ImageView portada = new ImageView();
+                                portada.setFitWidth(100);
+                                portada.setPreserveRatio(true);
+                                if (!finalImagenUrl.isEmpty()) {
+                                    // Carga de imagen vía HttpClient
+                                    try {
+                                        URI uri = URI.create(finalImagenUrl);
+                                        HttpRequest request = HttpRequest.newBuilder(uri)
+                                            .header("User-Agent", "Mozilla/5.0")
+                                            .build();
+                                        HttpClient client = HttpClient.newHttpClient();
+                                        HttpResponse<InputStream> response =
+                                            client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+                                        portada.setImage(new Image(response.body()));
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
 
-                                  HttpClient client = HttpClient.newHttpClient();
-                                  HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+                                // Etiquetas de texto
+                                Label titleLabel = new Label("Título: " + title);
+                                titleLabel.getStyleClass().add("libro-title");
+                                Label authorLabel = new Label("Autor: " + authors);
+                                authorLabel.getStyleClass().add("libro-author");
+                                Label editorialLabel = new Label("Editorial: " + finalEditorial);
+                                editorialLabel.getStyleClass().add("libro-editorial");
 
-                                  portada.setImage(new Image(response.body()));
-                              } catch (Exception e) {
-                                  e.printStackTrace();
-                              }
-                          }
+                                // Organizar contenido en HBox y VBox
+                                VBox infoBox = new VBox(5, titleLabel, authorLabel, editorialLabel);
+                                HBox content = new HBox(15, portada, infoBox);
+                                card.getChildren().add(content);
 
-                          // Crear etiquetas de información
-                          Label titleLabel = new Label("Título: " + title);
-                          titleLabel.getStyleClass().add("libro-title");
+                                // Evento al clicar la tarjeta: ir a detalles
+                                card.setOnMouseClicked(e -> {
+                                    try {
+                                        // Crear entidad Libro con datos de búsqueda
+                                        Libro libro = new Libro(
+                                            title, authors, finalDescripcion,
+                                            finalImagenUrl, finalEditorial
+                                        );
+                                        // Cargar vista de detalles
+                                        FXMLLoader loader = new FXMLLoader(
+                                            getClass().getResource("/views/DetailsPane.fxml")
+                                        );
+                                        AnchorPane detailsPane = loader.load();
+                                        // Pasar modelo al controlador de detalles
+                                        controllers.DetailsController controller =
+                                            loader.getController();
+                                        controller.setLibro(libro);
+                                        // Cambiar root de la escena actual
+                                        Stage stage = (Stage) searchField.getScene().getWindow();
+                                        stage.getScene().setRoot(detailsPane);
+                                    } catch (Exception ex) {
+                                        ex.printStackTrace();
+                                    }
+                                });
 
-                          Label authorLabel = new Label("Autor: " + authors);
-                          authorLabel.getStyleClass().add("libro-author");
+                                // Añadir tarjeta al contenedor principal
+                                resultsContainer.getChildren().add(card);
+                            }
+                        } else {
+                            // Mostrar mensaje si no hay resultados
+                            resultsContainer.getChildren()
+                                .add(new Label("No se encontraron resultados."));
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                // En caso de error de conexión, mostrar mensaje en UI
+                Platform.runLater(() -> {
+                    resultsContainer.getChildren()
+                        .add(new Label("Error al conectar con Google Books."));
+                });
+                e.printStackTrace();
+            }
+        }).start();
+    }
 
-                          Label editorialLabel = new Label("Editorial: " + finalEditorial);
-                          editorialLabel.getStyleClass().add("libro-editorial");
+    /** Navega a la vista de búsqueda (esta misma pantalla). */
+    @FXML private void handleShowBuscar() {
+        cambiarPantalla("/views/HomePanePane.fxml");
+    }
 
-                          VBox infoBox = new VBox(5, titleLabel, authorLabel, editorialLabel);
-                          HBox content = new HBox(15, portada, infoBox);
-                          card.getChildren().add(content);
+    /** Navega a la vista de recomendaciones. */
+    @FXML private void handleShowRecomendaciones() {
+        cambiarPantalla("/views/RecomendationsPane.fxml");
+    }
 
-                          // Acción al hacer clic sobre la tarjeta: ir a la pantalla de detalles
-                          card.setOnMouseClicked(e -> {
-                              try {
-                                  // Crear instancia de Libro con la información recuperada
-                                  Libro libro = new Libro(title, authors, finalDescripcion, finalImagenUrl, finalEditorial);
+    /** Navega a la vista de "Mi Biblioteca". */
+    @FXML private void handleShowBiblioteca() {
+        cambiarPantalla("/views/UserLibraryPane.fxml");
+    }
 
-                                  FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Details.fxml"));
-                                  AnchorPane detailsPane = loader.load();
+    /** Navega a la vista de perfil de usuario. */
+    @FXML private void handleShowPerfil() {
+        cambiarPantalla("/views/ProfilePane.fxml");
+    }
 
-                                  controllers.DetailsController controller = loader.getController();
-                                  controller.setLibro(libro);
+    /**
+     * Cierra la sesión actual y vuelve a la pantalla de login.
+     * <p>
+     * Recarga el FXML de login y lo muestra en el Stage principal.
+     * </p>
+     */
+    @FXML
+    private void handleLogout() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/views/LoginDataPane.fxml")
+            );
+            AnchorPane loginPane = loader.load();
+            Stage stage = (Stage) drawerLogo.getScene().getWindow();
+            stage.setScene(new Scene(loginPane));
+            stage.setTitle("Biblioteca");
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-                                  Stage stage = (Stage) searchField.getScene().getWindow();
-                                  stage.getScene().setRoot(detailsPane);
-                              } catch (Exception ex) {
-                                  ex.printStackTrace();
-                              }
-                          });
-
-                          // Añadir la tarjeta al contenedor principal
-                          resultsContainer.getChildren().add(card);
-                      }
-                  } else {
-                      resultsContainer.getChildren().add(new Label("No se encontraron resultados."));
-                  }
-              });
-
-          } catch (Exception e) {
-              Platform.runLater(() -> {
-                  resultsContainer.getChildren().add(new Label("Error al conectar con Google Books."));
-              });
-              e.printStackTrace();
-          }
-      }).start();
-  }
-
-  // Métodos para navegación desde el Drawer
-  @FXML private void handleShowBuscar() {
-      cambiarPantalla("/views/HomePane.fxml");
-  }
-
-  @FXML private void handleShowRecomendaciones() {
-      cambiarPantalla("/views/Recomendations.fxml");
-  }
-
-  @FXML private void handleShowBiblioteca() {
-      cambiarPantalla("/views/UserLibrary.fxml");
-  }
-
-  @FXML private void handleShowPerfil() {
-      cambiarPantalla("/views/Profile.fxml");
-  }
-
-  // Cierra sesión y vuelve a la pantalla de login
-  @FXML
-  private void handleLogout() {
-      try {
-          FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/LoginDataPane.fxml"));
-          AnchorPane loginPane = loader.load();
-          Stage stage = (Stage) drawerLogo.getScene().getWindow();
-          stage.setScene(new javafx.scene.Scene(loginPane));
-          stage.setTitle("Biblioteca");
-          stage.show();
-      } catch (Exception e) {
-          e.printStackTrace();
-      }
-  }
-
-  // Cambia la vista actual por la indicada (usado para la navegación)
-  private void cambiarPantalla(String ruta) {
-      try {
-          FXMLLoader loader = new FXMLLoader(getClass().getResource(ruta));
-          AnchorPane root = loader.load();
-          Stage stage = (Stage) searchField.getScene().getWindow();
-          stage.getScene().setRoot(root);
-      } catch (Exception e) {
-          e.printStackTrace();
-      }
-  }
+    /**
+     * Helper para cambiar de pantalla sin recargar el Stage.
+     *
+     * @param ruta ruta relativa al recurso FXML destino
+     */
+    private void cambiarPantalla(String ruta) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource(ruta)
+            );
+            AnchorPane root = loader.load();
+            Stage stage = (Stage) drawerLogo.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

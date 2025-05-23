@@ -11,7 +11,6 @@ import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 
@@ -25,98 +24,161 @@ import org.hibernate.query.Query;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controlador de la pantalla de login.
+ * <p>
+ * Gestiona la autenticación de usuarios frente a la base de datos,
+ * la navegación a la pantalla principal tras el login exitoso
+ * y la transición a la pantalla de registro.
+ * También carga el logo de la aplicación al inicializarse.
+ * </p>
+ */
 public class LoginDataPaneController implements Initializable {
 
-  // Campos de entrada para email y contraseña del usuario
-  @FXML private TextField emailField;
-  @FXML private PasswordField passwordField;
+    /** Campo de texto para ingresar el correo electrónico del usuario. */
+    @FXML
+    private TextField emailField;
 
-  // Imagen del logo en la pantalla de login
-  @FXML private ImageView logoID;
+    /** Campo de texto para ingresar la contraseña del usuario. */
+    @FXML
+    private PasswordField passwordField;
 
-  // Evento al pulsar el botón "Iniciar sesión"
-  @FXML
-  private void handleLogin(ActionEvent event) {
-      String email = emailField.getText();
-      String password = passwordField.getText();
-      procesarLogin(email, password, event);
-  }
+    /** Imagen del logo que se muestra en la pantalla de login. */
+    @FXML
+    private ImageView logoID;
 
-  // Método que realiza la autenticación contra la base de datos
-  public void procesarLogin(String email, String password, ActionEvent event) {
-      // Validación de campos vacíos
-      if (email.isEmpty() || password.isEmpty()) {
-          showAlert(Alert.AlertType.ERROR, "Rellena todos los campos.");
-          return;
-      }
+    /**
+     * Manejador del botón "Iniciar sesión".
+     * <p>
+     * Obtiene los valores de email y contraseña y
+     * delega en {@link #procesarLogin(String, String, ActionEvent)}.
+     * </p>
+     *
+     * @param event evento de acción disparado al pulsar el botón
+     */
+    @FXML
+    private void handleLogin(ActionEvent event) {
+        String email = emailField.getText();
+        String password = passwordField.getText();
+        procesarLogin(email, password, event);
+    }
 
-      try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-          // Consulta para buscar el usuario con las credenciales proporcionadas
-          Query<Usuario> query = session.createQuery(
-              "FROM Usuario WHERE email = :email AND password = :password", Usuario.class);
-          query.setParameter("email", email);
-          query.setParameter("password", password);
-          Usuario usuario = query.uniqueResult();
+    /**
+     * Realiza el proceso de autenticación del usuario.
+     * <ol>
+     *   <li>Valida que los campos no estén vacíos.</li>
+     *   <li>Consulta la base de datos buscando un usuario con las credenciales.</li>
+     *   <li>Si existe, guarda el usuario en sesión y carga la vista principal.</li>
+     *   <li>Si no existe o hay error, muestra una alerta apropiada.</li>
+     * </ol>
+     *
+     * @param email    correo electrónico ingresado
+     * @param password contraseña ingresada
+     * @param event    evento de acción para obtener el Stage actual
+     */
+    public void procesarLogin(String email, String password, ActionEvent event) {
+        // Validación de campos obligatorios
+        if (email.isEmpty() || password.isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Rellena todos los campos.");
+            return;
+        }
 
-          if (usuario != null) {
-              // Si el usuario existe, lo guardamos en sesión y cargamos la pantalla principal
-              SessionManager.setUsuarioActual(usuario);
+        // Abrir sesión de Hibernate para consulta
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            // Crear consulta parametrizada para evitar inyecciones SQL
+            Query<Usuario> query = session.createQuery(
+                "FROM Usuario WHERE email = :email AND password = :password", Usuario.class
+            );
+            query.setParameter("email", email);
+            query.setParameter("password", password);
+            Usuario usuario = query.uniqueResult();
 
-              FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/HomePane.fxml"));
-              AnchorPane homePane = loader.load();
+            if (usuario != null) {
+                // Login exitoso: guardar usuario en sesión y cargar pantalla principal
+                SessionManager.setUsuarioActual(usuario);
+                FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/views/HomePane.fxml")
+                );
+                AnchorPane homePane = loader.load();
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                Scene scene = new Scene(homePane);
+                stage.setScene(scene);
+                stage.show();
+            } else {
+                // Credenciales incorrectas
+                showAlert(Alert.AlertType.ERROR, "Credenciales incorrectas.");
+            }
+        } catch (Exception e) {
+            // Error de acceso a la base de datos
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error al acceder a la base de datos.");
+        }
+    }
 
-              Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-              Scene scene = new Scene(homePane);
-              stage.setScene(scene);
-              stage.show();
-          } else {
-              // Si las credenciales no son correctas, mostramos un mensaje de error
-              showAlert(Alert.AlertType.ERROR, "Credenciales incorrectas.");
-          }
-      } catch (Exception e) {
-          e.printStackTrace();
-          showAlert(Alert.AlertType.ERROR, "Error al acceder a la base de datos.");
-      }
-  }
+    /**
+     * Manejador del enlace o botón "Registrarse".
+     * <p>
+     * Carga la vista de registro de usuario y la establece
+     * como la escena actual.
+     * </p>
+     *
+     * @param event evento de acción para obtener el Stage actual
+     */
+    @FXML
+    private void handleGoToRegister(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/views/RegisterDataPane.fxml")
+            );
+            AnchorPane registerPane = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Scene scene = new Scene(registerPane);
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "No se pudo cargar la pantalla de registro.");
+        }
+    }
 
-  // Evento al pulsar el enlace o botón "Registrarse"
-  @FXML
-  private void handleGoToRegister(ActionEvent event) {
-      try {
-          // Carga la pantalla de registro y la reemplaza en la escena actual
-          FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/RegisterDataPane.fxml"));
-          AnchorPane registerPane = loader.load();
+    /**
+     * Muestra una alerta emergente al usuario.
+     *
+     * @param type    tipo de alerta (INFO, WARNING, ERROR, etc.)
+     * @param message mensaje a mostrar en la alerta
+     */
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle("Mensaje");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 
-          Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-          Scene scene = new Scene(registerPane);
-          stage.setScene(scene);
-          stage.show();
-      } catch (Exception e) {
-          e.printStackTrace();
-          showAlert(Alert.AlertType.ERROR, "No se pudo cargar la pantalla de registro.");
-      }
-  }
-
-  // Método para mostrar mensajes emergentes (alertas) al usuario
-  private void showAlert(Alert.AlertType type, String message) {
-      Alert alert = new Alert(type);
-      alert.setTitle("Mensaje");
-      alert.setHeaderText(null);
-      alert.setContentText(message);
-      alert.showAndWait();
-  }
-
-  // Al inicializar el controlador, cargamos el logo desde una URL
-  @Override
-  public void initialize(URL location, ResourceBundle resources) {
-      String imageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png";
-      try {
-          Image image = new Image(imageUrl);
-          if (!image.isError()) {
-              logoID.setImage(image);
-          }
-      } catch (Exception e) {
-          e.printStackTrace();
-      }
-  }
+    /**
+     * Inicializador del controlador.
+     * <p>
+     * Se ejecuta una vez cargado el FXML y su contexto.
+     * Carga la imagen del logo de la aplicación.
+     * </p>
+     *
+     * @param location  ubicación del recurso FXML (no usado)
+     * @param resources bundle de recursos (no usado)
+     */
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        String imageUrl =
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/"
+          + "c/cf/Calibre_logo_3.png/640px-Calibre_logo_3.png";
+        try {
+            // Intentar cargar la imagen directamente desde la URL
+            Image image = new Image(imageUrl);
+            if (!image.isError()) {
+                logoID.setImage(image);
+            }
+        } catch (Exception e) {
+            // En caso de fallo, imprimir stack trace
+            e.printStackTrace();
+        }
+    }
 }
