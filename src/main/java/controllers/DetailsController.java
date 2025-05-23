@@ -293,7 +293,7 @@ public class DetailsController {
 
     /** Navega a la vista de búsqueda de libros. */
     @FXML private void handleShowBuscar() {
-        cambiarPantalla("/views/HomePanePane.fxml");
+        cambiarPantalla("/views/HomePane.fxml");
     }
 
     /** Navega a la vista de recomendaciones. */

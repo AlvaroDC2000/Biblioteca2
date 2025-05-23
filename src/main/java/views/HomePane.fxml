@@ -40,8 +40,8 @@
                     </Button>
                     <Button maxWidth="195.0" onAction="#handleShowRecomendaciones" prefHeight="39.0" prefWidth="195.0" text="Recomendaciones" />
                     <Button maxWidth="195.0" onAction="#handleShowBiblioteca" prefHeight="39.0" prefWidth="195.0" text="Mi Biblioteca" />
-                    <Button maxWidth="195.0" onAction="#handleShowPerfil" prefHeight="39.0" prefWidth="195.0" text="Perfil" />
-                    <Button maxWidth="195.0" onAction="#handleLogout" prefHeight="39.0" prefWidth="195.0" text="Cerrar sesión" />
+                    <Button fx:id="profileButton" maxWidth="195.0" onAction="#handleShowPerfil" prefHeight="39.0" prefWidth="195.0" text="Perfil" />
+                    <Button fx:id="logoutButton" maxWidth="195.0" onAction="#handleLogout" prefHeight="39.0" prefWidth="195.0" text="Cerrar sesión" />
                 </VBox>
             </left>
 
@@ -55,7 +55,7 @@
 
                     <HBox alignment="CENTER" spacing="10">
                         <TextField fx:id="searchField" prefWidth="400" promptText="Buscar libros por título, autor, ISBN..." />
-                        <Button onAction="#handleSearch" styleClass="button button-primary" text="Buscar" />
+                        <Button fx:id="searchButton" onAction="#handleSearch" styleClass="button button-primary" text="Buscar" />
                     </HBox>
 
                     <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="542.0" prefWidth="706.0">

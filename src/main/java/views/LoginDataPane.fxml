@@ -39,8 +39,8 @@
             </GridPane>
 
             <HBox alignment="CENTER" spacing="25">
-                <Button onAction="#handleLogin" prefWidth="150" styleClass="button button-primary" text="Iniciar sesión" />
-                <Button onAction="#handleGoToRegister" prefWidth="150" styleClass="button button-secondary" text="Registrarse" />
+                <Button fx:id="loginButton" onAction="#handleLogin" prefWidth="150" styleClass="button button-primary" text="Iniciar sesión" />
+                <Button fx:id="registerButton" onAction="#handleGoToRegister" prefWidth="150" styleClass="button button-secondary" text="Registrarse" />
             </HBox>
         </VBox>
     </children>
